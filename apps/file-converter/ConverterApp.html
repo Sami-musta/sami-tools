@@ -23,6 +23,87 @@
             color: #000000;
             line-height: 1.6;
             overflow-x: hidden;
+            padding-top: 70px; /* Space for fixed header */
+        }
+
+        /* Navigation Header */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #000000;
+            color: #ffffff;
+            z-index: 1000;
+            border-bottom: 3px solid #ff6b35;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+        .nav-logo:hover {
+            color: #ff6b35;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .nav-link:hover {
+            color: #ff6b35;
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .nav-back-btn {
+            background: #ff6b35;
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-back-btn:hover {
+            background: #e55a2b;
+            transform: translateY(-1px);
         }
 
         .header {
@@ -515,6 +596,30 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                padding-top: 60px;
+            }
+
+            .nav-content {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .nav-links {
+                gap: 15px;
+            }
+
+            .nav-link {
+                font-size: 0.8rem;
+                padding: 6px 10px;
+            }
+
+            .nav-back-btn {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+
             .container {
                 padding: 20px 16px;
             }
@@ -666,6 +771,19 @@
     </style>
 </head>
 <body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-content">
+            <a href="../../index.html" class="nav-logo">Sami's Tools</a>
+            <div class="nav-links">
+                <a href="../../index.html" class="nav-link">Home</a>
+                <a href="../../index.html#tools" class="nav-link">Tools</a>
+                <a href="https://github.com/Sami-musta" class="nav-link" target="_blank">GitHub</a>
+                <a href="../../index.html" class="nav-back-btn">← Back to Hub</a>
+            </div>
+        </div>
+    </nav>
+
     <header class="header">
         <div class="header-content">
             <div>
