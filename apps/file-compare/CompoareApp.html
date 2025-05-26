@@ -1,0 +1,2078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Comparator | Compare Lists & Files</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+            overflow-x: hidden;
+            padding-top: 70px;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #000000;
+            color: #ffffff;
+            z-index: 1000;
+            border-bottom: 3px solid #ff6b35;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+        .nav-logo:hover {
+            color: #ff6b35;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .nav-link:hover {
+            color: #ff6b35;
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .nav-back-btn {
+            background: #ff6b35;
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-back-btn:hover {
+            background: #e55a2b;
+            transform: translateY(-1px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 40px 0;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #000000;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            color: #666666;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            line-height: 1.5;
+        }
+
+        .feature-pills {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .pill {
+            background: #f5f5f5;
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid #e0e0e0;
+        }
+
+        .section {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ff6b35;
+            padding-bottom: 8px;
+            display: inline-block;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .list-panel {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .list-header {
+            background: #f8f9fa;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-title {
+            font-weight: 700;
+            color: #000000;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .list-title.list-a {
+            color: #dc3545;
+        }
+
+        .list-title.list-b {
+            color: #28a745;
+        }
+
+        .file-upload-btn {
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .file-upload-btn:hover {
+            background: #ff6b35;
+        }
+
+        .list-content {
+            padding: 20px;
+        }
+
+        .list-input {
+            width: 100%;
+            min-height: 200px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 12px;
+            font-family: 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .list-input:focus {
+            outline: none;
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.1);
+        }
+
+        .list-input::placeholder {
+            color: #999999;
+            font-style: italic;
+        }
+
+        .file-info {
+            background: #f8f9fa;
+            border-left: 4px solid #ff6b35;
+            padding: 12px;
+            margin-top: 10px;
+            display: none;
+            border-radius: 0 4px 4px 0;
+            font-size: 0.85rem;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 4px;
+        }
+
+        .file-size {
+            color: #666666;
+            font-size: 0.8rem;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .options-section {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .mode-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .mode-option:hover {
+            border-color: #ff6b35;
+            background: #fff9f7;
+        }
+
+        .mode-option.active {
+            border-color: #ff6b35;
+            background: #ff6b35;
+            color: #ffffff;
+        }
+
+        .mode-radio {
+            width: 18px;
+            height: 18px;
+            accent-color: #ff6b35;
+        }
+
+        .table-options {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        .table-options.active {
+            display: block;
+        }
+
+        .column-selector {
+            margin-top: 15px;
+        }
+
+        .column-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .column-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .column-checkbox {
+            width: 16px;
+            height: 16px;
+            accent-color: #ff6b35;
+        }
+
+        .table-preview {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .preview-table th {
+            background: #000000;
+            color: #ffffff;
+            padding: 8px;
+            font-weight: 600;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .preview-table td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333333;
+        }
+
+        .preview-table tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .table-result-panel {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .table-result-content {
+            padding: 15px;
+            max-height: 400px;
+            overflow: auto;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .result-table th {
+            background: #f8f9fa;
+            color: #000000;
+            padding: 10px 8px;
+            font-weight: 600;
+            text-align: left;
+            border-bottom: 2px solid #e0e0e0;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-table th.comparison-column {
+            background: #ff6b35;
+            color: #ffffff;
+        }
+
+        .result-table td {
+            padding: 8px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333333;
+            font-family: 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', Consolas, monospace;
+            font-size: 0.85rem;
+        }
+
+        .result-table td.comparison-column {
+            background: rgba(255, 107, 53, 0.1);
+            font-weight: 600;
+        }
+
+        .result-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .comparison-info {
+            background: #e8f4fd;
+            border: 1px solid #0066cc;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .comparison-info strong {
+            color: #0066cc;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .option-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .option-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #ff6b35;
+        }
+
+        .option-label {
+            font-size: 0.9rem;
+            color: #333333;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .controls {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            background: #333333;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-accent {
+            background: #ff6b35;
+            color: #ffffff;
+        }
+
+        .btn-accent:hover {
+            background: #e55a2b;
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #000000;
+            border: 2px solid #000000;
+        }
+
+        .btn-secondary:hover {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .results-section {
+            display: none;
+            margin-top: 40px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .result-panel {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .result-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-header.only-a {
+            background: rgba(220, 53, 69, 0.1);
+            border-left: 4px solid #dc3545;
+        }
+
+        .result-header.only-b {
+            background: rgba(40, 167, 69, 0.1);
+            border-left: 4px solid #28a745;
+        }
+
+        .result-header.both {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .result-title {
+            font-weight: 700;
+            color: #000000;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-count {
+            background: #000000;
+            color: #ffffff;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .result-content {
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .result-list {
+            list-style: none;
+        }
+
+        .result-item {
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-family: 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', Consolas, monospace;
+            font-size: 0.85rem;
+            color: #333333;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-stats {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ff6b35;
+            display: block;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 5px;
+        }
+
+        .download-section {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .status {
+            padding: 16px 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+            display: none;
+            font-weight: 500;
+            border-left: 4px solid;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666666;
+            font-weight: 500;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #ff6b35;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 12px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            padding: 30px 0;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            color: #666666;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 60px;
+            }
+
+            .nav-content {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .nav-links {
+                gap: 15px;
+            }
+
+            .nav-link {
+                font-size: 0.8rem;
+                padding: 6px 10px;
+            }
+
+            .nav-back-btn {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+
+            .container {
+                padding: 20px 16px;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+
+            .hero-description {
+                font-size: 1.1rem;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+
+            .summary-stats {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding-top: 80px;
+            }
+
+            .nav-content {
+                flex-direction: column;
+                gap: 12px;
+                padding: 10px 12px;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 12px;
+            }
+
+            .nav-link, .nav-back-btn {
+                font-size: 0.75rem;
+                padding: 6px 10px;
+            }
+
+            .container {
+                padding: 15px 12px;
+            }
+
+            .hero-title {
+                font-size: 1.8rem;
+                margin-bottom: 12px;
+            }
+
+            .hero-description {
+                font-size: 1rem;
+                margin-bottom: 30px;
+            }
+
+            .section {
+                padding: 20px 16px;
+                margin-bottom: 20px;
+            }
+
+            .list-input {
+                min-height: 150px;
+                font-size: 0.85rem;
+            }
+
+            .summary-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+
+            .result-content {
+                max-height: 200px;
+            }
+
+            .download-section {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-content">
+            <a href="../../index.html" class="nav-logo">Sami's Tools</a>
+            <div class="nav-links">
+                <a href="../../index.html" class="nav-link">Home</a>
+                <a href="../../index.html#tools" class="nav-link">Tools</a>
+                <a href="https://github.com/Sami-musta" class="nav-link" target="_blank">GitHub</a>
+                <a href="../../index.html" class="nav-back-btn">← Back to Hub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section class="hero-section">
+            <h1 class="hero-title">Compare Lists & Files</h1>
+            <p class="hero-description">
+                Compare two lists or files to find differences, duplicates, and unique items. 
+                Supports text lists, CSV, Excel, and TXT files with advanced comparison options.
+            </p>
+            <div class="feature-pills">
+                <span class="pill">Text Lists</span>
+                <span class="pill">CSV Files</span>
+                <span class="pill">Excel Files</span>
+                <span class="pill">Difference Analysis</span>
+                <span class="pill">Export Results</span>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Input Data</h2>
+            
+            <div class="comparison-grid">
+                <div class="list-panel">
+                    <div class="list-header">
+                        <h3 class="list-title list-a">List A</h3>
+                        <button class="file-upload-btn" onclick="document.getElementById('fileInputA').click()">
+                            📁 Upload File
+                        </button>
+                        <input type="file" id="fileInputA" accept=".txt,.csv,.xls,.xlsx">
+                    </div>
+                    <div class="list-content">
+                        <textarea 
+                            id="listA" 
+                            class="list-input" 
+                            placeholder="Enter items one per line or upload a file...
+apple
+banana
+cherry
+date">
+                        </textarea>
+                        <div class="file-info" id="fileInfoA">
+                            <div class="file-name" id="fileNameA"></div>
+                            <div class="file-size" id="fileSizeA"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="list-panel">
+                    <div class="list-header">
+                        <h3 class="list-title list-b">List B</h3>
+                        <button class="file-upload-btn" onclick="document.getElementById('fileInputB').click()">
+                            📁 Upload File
+                        </button>
+                        <input type="file" id="fileInputB" accept=".txt,.csv,.xls,.xlsx">
+                    </div>
+                    <div class="list-content">
+                        <textarea 
+                            id="listB" 
+                            class="list-input" 
+                            placeholder="Enter items one per line or upload a file...
+banana
+cherry
+elderberry
+fig">
+                        </textarea>
+                        <div class="file-info" id="fileInfoB">
+                            <div class="file-name" id="fileNameB"></div>
+                            <div class="file-size" id="fileSizeB"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="options-section">
+            <div class="mode-selector">
+                <label class="mode-option active" id="listModeOption">
+                    <input type="radio" name="comparisonMode" value="list" class="mode-radio" checked>
+                    <span>📝 List Mode</span>
+                </label>
+                <label class="mode-option" id="tableModeOption">
+                    <input type="radio" name="comparisonMode" value="table" class="mode-radio">
+                    <span>📊 Table Mode</span>
+                </label>
+            </div>
+
+            <div class="options-grid">
+                <div class="option-group">
+                    <input type="checkbox" id="caseSensitive" class="option-checkbox">
+                    <label for="caseSensitive" class="option-label">Case Sensitive</label>
+                </div>
+                <div class="option-group">
+                    <input type="checkbox" id="trimWhitespace" class="option-checkbox" checked>
+                    <label for="trimWhitespace" class="option-label">Trim Whitespace</label>
+                </div>
+                <div class="option-group">
+                    <input type="checkbox" id="ignoreEmpty" class="option-checkbox" checked>
+                    <label for="ignoreEmpty" class="option-label">Ignore Empty Lines</label>
+                </div>
+                <div class="option-group">
+                    <input type="checkbox" id="removeDuplicates" class="option-checkbox">
+                    <label for="removeDuplicates" class="option-label">Remove Duplicates</label>
+                </div>
+            </div>
+
+            <div class="table-options" id="tableOptions">
+                <h4 style="margin-bottom: 15px; font-weight: 700; color: #000000; text-transform: uppercase; letter-spacing: 0.5px;">Table Comparison Settings</h4>
+                
+                <div class="comparison-info">
+                    <strong>💡 How it works:</strong> Select the columns to compare to identify similar rows. 
+                    All columns will be displayed in the results, but the comparison will only be based on the selected columns.
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h5 style="margin-bottom: 10px; font-weight: 600; color: #333;">Table A Columns (for comparison)</h5>
+                        <div class="column-selector">
+                            <div class="column-grid" id="columnsA"></div>
+                        </div>
+                        <div class="table-preview" id="previewA" style="display: none;">
+                            <table class="preview-table" id="previewTableA"></table>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h5 style="margin-bottom: 10px; font-weight: 600; color: #333;">Table B Columns (for comparison)</h5>
+                        <div class="column-selector">
+                            <div class="column-grid" id="columnsB"></div>
+                        </div>
+                        <div class="table-preview" id="previewB" style="display: none;">
+                            <table class="preview-table" id="previewTableB"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-accent" id="compareBtn">⚡ Compare Lists</button>
+                <button class="btn btn-secondary" id="clearBtn">🗑️ Clear All</button>
+            </div>
+        </section>
+
+        <div class="loading" id="loading">
+            <span class="spinner"></span>
+            Comparing lists...
+        </div>
+
+        <div class="status" id="status"></div>
+
+        <section class="results-section" id="resultsSection">
+            <div class="section">
+                <h2 class="section-title">Comparison Results</h2>
+                
+                <div class="summary-stats" id="summaryStats">
+                    <div class="stat">
+                        <span class="stat-number" id="totalA">0</span>
+                        <span class="stat-label" id="totalALabel">Items in List A</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="totalB">0</span>
+                        <span class="stat-label" id="totalBLabel">Items in List B</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="onlyACount">0</span>
+                        <span class="stat-label" id="onlyALabel">Only in A</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="onlyBCount">0</span>
+                        <span class="stat-label" id="onlyBLabel">Only in B</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="bothCount">0</span>
+                        <span class="stat-label" id="bothLabel">In Both Lists</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="duplicatesACount">0</span>
+                        <span class="stat-label">Duplicates in A</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="duplicatesBCount">0</span>
+                        <span class="stat-label">Duplicates in B</span>
+                    </div>
+                </div>
+
+                <!-- List Mode Results -->
+                <div class="results-grid" id="listResults">
+                    <div class="result-panel">
+                        <div class="result-header only-a">
+                            <span class="result-title">Only in List A</span>
+                            <span class="result-count" id="onlyACountBadge">0</span>
+                        </div>
+                        <div class="result-content">
+                            <ul class="result-list" id="onlyAList"></ul>
+                        </div>
+                    </div>
+
+                    <div class="result-panel">
+                        <div class="result-header only-b">
+                            <span class="result-title">Only in List B</span>
+                            <span class="result-count" id="onlyBCountBadge">0</span>
+                        </div>
+                        <div class="result-content">
+                            <ul class="result-list" id="onlyBList"></ul>
+                        </div>
+                    </div>
+
+                    <div class="result-panel">
+                        <div class="result-header both">
+                            <span class="result-title">In Both Lists</span>
+                            <span class="result-count" id="bothCountBadge">0</span>
+                        </div>
+                        <div class="result-content">
+                            <ul class="result-list" id="bothList"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Duplicates Section -->
+                <div class="results-grid" id="duplicatesResults" style="display: none;">
+                    <div class="result-panel">
+                        <div class="result-header" style="background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107;">
+                            <span class="result-title">Duplicates in List A</span>
+                            <span class="result-count" id="duplicatesACountBadge">0</span>
+                        </div>
+                        <div class="result-content">
+                            <ul class="result-list" id="duplicatesAList"></ul>
+                        </div>
+                    </div>
+
+                    <div class="result-panel">
+                        <div class="result-header" style="background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107;">
+                            <span class="result-title">Duplicates in List B</span>
+                            <span class="result-count" id="duplicatesBCountBadge">0</span>
+                        </div>
+                        <div class="result-content">
+                            <ul class="result-list" id="duplicatesBList"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Mode Results -->
+                <div id="tableResults" style="display: none;">
+                    <div id="comparisonInfo" class="comparison-info" style="display: none;">
+                        <!-- Info dynamique sur les colonnes comparées -->
+                    </div>
+                    
+                    <div class="table-result-panel">
+                        <div class="result-header only-a">
+                            <span class="result-title">Rows Only in Table A</span>
+                            <span class="result-count" id="onlyATableCount">0</span>
+                        </div>
+                        <div class="table-result-content">
+                            <table class="result-table" id="onlyATable"></table>
+                        </div>
+                    </div>
+
+                    <div class="table-result-panel">
+                        <div class="result-header only-b">
+                            <span class="result-title">Rows Only in Table B</span>
+                            <span class="result-count" id="onlyBTableCount">0</span>
+                        </div>
+                        <div class="table-result-content">
+                            <table class="result-table" id="onlyBTable"></table>
+                        </div>
+                    </div>
+
+                    <div class="table-result-panel">
+                        <div class="result-header both">
+                            <span class="result-title">Common Rows (In Both Tables)</span>
+                            <span class="result-count" id="bothTableCount">0</span>
+                        </div>
+                        <div class="table-result-content">
+                            <table class="result-table" id="bothTable"></table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="download-section">
+                    <button class="btn" id="downloadOnlyA">⬇️ Download Only A</button>
+                    <button class="btn" id="downloadOnlyB">⬇️ Download Only B</button>
+                    <button class="btn" id="downloadBoth">⬇️ Download Common</button>
+                    <button class="btn" style="background: #ffc107; color: #000;" id="downloadDuplicatesA">⬇️ Download Duplicates A</button>
+                    <button class="btn" style="background: #ffc107; color: #000;" id="downloadDuplicatesB">⬇️ Download Duplicates B</button>
+                    <button class="btn btn-accent" id="downloadAll">⬇️ Download All Results</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>Built with modern web technologies • All processing happens locally in your browser • No data is sent to servers</p>
+        </div>
+    </footer>
+
+    <script>
+        let comparisonResults = {
+            onlyA: [],
+            onlyB: [],
+            both: [],
+            duplicatesA: [],
+            duplicatesB: []
+        };
+
+        let tableDataA = null;
+        let tableDataB = null;
+        let currentMode = 'list';
+        let selectedColumnsA = [];
+        let selectedColumnsB = [];
+
+        // Elements
+        const listAInput = document.getElementById('listA');
+        const listBInput = document.getElementById('listB');
+        const fileInputA = document.getElementById('fileInputA');
+        const fileInputB = document.getElementById('fileInputB');
+        const compareBtn = document.getElementById('compareBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const loading = document.getElementById('loading');
+        const status = document.getElementById('status');
+        const resultsSection = document.getElementById('resultsSection');
+
+        // Mode options
+        const listModeOption = document.getElementById('listModeOption');
+        const tableModeOption = document.getElementById('tableModeOption');
+        const tableOptions = document.getElementById('tableOptions');
+
+        // Options
+        const caseSensitive = document.getElementById('caseSensitive');
+        const trimWhitespace = document.getElementById('trimWhitespace');
+        const ignoreEmpty = document.getElementById('ignoreEmpty');
+        const removeDuplicates = document.getElementById('removeDuplicates');
+
+        // Event Listeners
+        fileInputA.addEventListener('change', (e) => handleFileUpload(e, 'A'));
+        fileInputB.addEventListener('change', (e) => handleFileUpload(e, 'B'));
+        compareBtn.addEventListener('click', compareLists);
+        clearBtn.addEventListener('click', clearAll);
+
+        // Mode switching
+        document.querySelectorAll('input[name="comparisonMode"]').forEach(radio => {
+            radio.addEventListener('change', switchMode);
+        });
+
+        // Download buttons
+        document.getElementById('downloadOnlyA').addEventListener('click', () => downloadResults('onlyA', 'only-in-A'));
+        document.getElementById('downloadOnlyB').addEventListener('click', () => downloadResults('onlyB', 'only-in-B'));
+        document.getElementById('downloadBoth').addEventListener('click', () => downloadResults('both', 'common-items'));
+        document.getElementById('downloadDuplicatesA').addEventListener('click', () => downloadResults('duplicatesA', 'duplicates-in-A'));
+        document.getElementById('downloadDuplicatesB').addEventListener('click', () => downloadResults('duplicatesB', 'duplicates-in-B'));
+        document.getElementById('downloadAll').addEventListener('click', downloadAllResults);
+
+        function switchMode() {
+            const selectedMode = document.querySelector('input[name="comparisonMode"]:checked').value;
+            currentMode = selectedMode;
+            
+            if (selectedMode === 'table') {
+                tableModeOption.classList.add('active');
+                listModeOption.classList.remove('active');
+                tableOptions.classList.add('active');
+                compareBtn.textContent = '⚡ Compare Tables';
+            } else {
+                listModeOption.classList.add('active');
+                tableModeOption.classList.remove('active');
+                tableOptions.classList.remove('active');
+                compareBtn.textContent = '⚡ Compare Lists';
+            }
+            
+            // Clear previous results when switching modes
+            resultsSection.style.display = 'none';
+        }
+
+        async function handleFileUpload(event, listType) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const fileInfo = document.getElementById(`fileInfo${listType}`);
+            const fileName = document.getElementById(`fileName${listType}`);
+            const fileSize = document.getElementById(`fileSize${listType}`);
+            const listInput = document.getElementById(`list${listType}`);
+
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.style.display = 'block';
+
+            try {
+                const content = await readFile(file, listType);
+                listInput.value = content.text;
+                
+                // Store table data for table mode
+                if (listType === 'A') {
+                    tableDataA = content.tableData;
+                } else {
+                    tableDataB = content.tableData;
+                }
+                
+                // If we have table data and we're in table mode, show column selectors
+                if (content.tableData && currentMode === 'table') {
+                    setupColumnSelectors(content.tableData, listType);
+                    showTablePreview(content.tableData, listType);
+                }
+                
+                showStatus(`File "${file.name}" loaded successfully`, 'success');
+            } catch (error) {
+                console.error('Error reading file:', error);
+                showStatus('Error reading file. Please check the file format.', 'error');
+                fileInfo.style.display = 'none';
+            }
+        }
+
+        async function readFile(file, listType) {
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            
+            if (fileExtension === 'txt') {
+                const text = await readTextFile(file);
+                return { text, tableData: null };
+            } else if (fileExtension === 'csv') {
+                return await readCSVFile(file);
+            } else if (fileExtension === 'xls' || fileExtension === 'xlsx') {
+                return await readExcelFile(file);
+            } else {
+                throw new Error('Unsupported file format');
+            }
+        }
+
+        function readTextFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.onerror = e => reject(e);
+                reader.readAsText(file);
+            });
+        }
+
+        async function readCSVFile(file) {
+            const text = await readTextFile(file);
+            const parsed = Papa.parse(text, {
+                header: true,
+                skipEmptyLines: true,
+                dynamicTyping: true
+            });
+            
+            const tableData = {
+                headers: parsed.meta.fields || [],
+                rows: parsed.data
+            };
+            
+            // For list mode, flatten to text
+            const listText = parsed.data.map(row => 
+                Object.values(row).join(' | ')
+            ).join('\n');
+            
+            return { text: listText, tableData };
+        }
+
+        function readExcelFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    try {
+                        const workbook = XLSX.read(e.target.result, {type: 'array'});
+                        const sheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[sheetName];
+                        const data = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''});
+                        
+                        if (data.length === 0) {
+                            throw new Error('Empty file');
+                        }
+                        
+                        const headers = data[0];
+                        const rows = data.slice(1).map(row => {
+                            const obj = {};
+                            headers.forEach((header, index) => {
+                                obj[header] = row[index] || '';
+                            });
+                            return obj;
+                        });
+                        
+                        const tableData = { headers, rows };
+                        
+                        // For list mode, flatten to text
+                        const listText = rows.map(row => 
+                            Object.values(row).join(' | ')
+                        ).join('\n');
+                        
+                        resolve({ text: listText, tableData });
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = e => reject(e);
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function setupColumnSelectors(tableData, listType) {
+            const container = document.getElementById(`columns${listType}`);
+            container.innerHTML = '';
+            
+            tableData.headers.forEach((header, index) => {
+                const option = document.createElement('div');
+                option.className = 'column-option';
+                option.innerHTML = `
+                    <input type="checkbox" class="column-checkbox" id="col${listType}_${index}" value="${header}" checked>
+                    <label for="col${listType}_${index}">${header}</label>
+                `;
+                
+                // Add event listener for real-time selection update
+                const checkbox = option.querySelector('.column-checkbox');
+                checkbox.addEventListener('change', () => updateSelectedColumns(listType));
+                
+                container.appendChild(option);
+            });
+            
+            // Initialize selected columns
+            updateSelectedColumns(listType);
+        }
+
+        function updateSelectedColumns(listType) {
+            const checkboxes = document.querySelectorAll(`#columns${listType} .column-checkbox:checked`);
+            const selected = Array.from(checkboxes).map(cb => cb.value);
+            
+            if (listType === 'A') {
+                selectedColumnsA = selected;
+            } else {
+                selectedColumnsB = selected;
+            }
+        }
+
+        function showTablePreview(tableData, listType) {
+            const preview = document.getElementById(`preview${listType}`);
+            const table = document.getElementById(`previewTable${listType}`);
+            
+            table.innerHTML = '';
+            
+            // Create header
+            const headerRow = document.createElement('tr');
+            tableData.headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+            table.appendChild(headerRow);
+            
+            // Show first 5 rows
+            tableData.rows.slice(0, 5).forEach(row => {
+                const tr = document.createElement('tr');
+                tableData.headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.textContent = row[header] || '';
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+            
+            preview.style.display = 'block';
+        }
+
+        function getSelectedColumns(listType) {
+            const checkboxes = document.querySelectorAll(`#columns${listType} .column-checkbox:checked`);
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        function compareLists() {
+            if (currentMode === 'table') {
+                compareTablesMode();
+            } else {
+                compareListsMode();
+            }
+        }
+
+        function compareListsMode() {
+            const listAText = listAInput.value;
+            const listBText = listBInput.value;
+
+            if (!listAText.trim() && !listBText.trim()) {
+                showStatus('Please enter data in at least one list', 'error');
+                return;
+            }
+
+            showLoading();
+            hideStatus();
+
+            setTimeout(() => {
+                try {
+                    const listA = processListText(listAText);
+                    const listB = processListText(listBText);
+
+                    comparisonResults = compareArrays(listA, listB);
+                    displayListResults();
+                    
+                    showStatus('✅ Comparison completed successfully!', 'success');
+                } catch (error) {
+                    console.error('Comparison error:', error);
+                    showStatus('❌ Error during comparison. Please check your input.', 'error');
+                } finally {
+                    hideLoading();
+                }
+            }, 500);
+        }
+
+        function compareTablesMode() {
+            if (!tableDataA && !tableDataB) {
+                showStatus('Please upload CSV or Excel files for table comparison', 'error');
+                return;
+            }
+
+            if (!tableDataA || !tableDataB) {
+                showStatus('Please upload files for both Table A and Table B', 'error');
+                return;
+            }
+
+            // Get currently selected columns
+            selectedColumnsA = getSelectedColumns('A');
+            selectedColumnsB = getSelectedColumns('B');
+
+            if (selectedColumnsA.length === 0 || selectedColumnsB.length === 0) {
+                showStatus('Please select at least one column from each table', 'error');
+                return;
+            }
+
+            showLoading();
+            hideStatus();
+
+            setTimeout(() => {
+                try {
+                    comparisonResults = compareTablesData(tableDataA, tableDataB, selectedColumnsA, selectedColumnsB);
+                    displayTableResults();
+                    
+                    showStatus('✅ Table comparison completed successfully!', 'success');
+                } catch (error) {
+                    console.error('Table comparison error:', error);
+                    showStatus('❌ Error during table comparison.', 'error');
+                } finally {
+                    hideLoading();
+                }
+            }, 500);
+        }
+
+        function findTableDuplicates(rows, columns) {
+            const createRowKey = (row, columns) => {
+                return columns.map(col => {
+                    let value = String(row[col] || '');
+                    if (trimWhitespace.checked) value = value.trim();
+                    if (!caseSensitive.checked) value = value.toLowerCase();
+                    return value;
+                }).join('|');
+            };
+
+            const seen = new Set();
+            const duplicates = [];
+            
+            rows.forEach(row => {
+                const key = createRowKey(row, columns);
+                if (seen.has(key)) {
+                    duplicates.push(row);
+                } else {
+                    seen.add(key);
+                }
+            });
+            
+            return duplicates;
+        }
+
+        function compareTablesData(dataA, dataB, columnsA, columnsB) {
+            // Create comparable strings for each row based on selected columns
+            const createRowKey = (row, columns) => {
+                return columns.map(col => {
+                    let value = String(row[col] || '');
+                    if (trimWhitespace.checked) value = value.trim();
+                    if (!caseSensitive.checked) value = value.toLowerCase();
+                    return value;
+                }).join('|');
+            };
+
+            const rowsA = dataA.rows.map((row, index) => ({
+                originalRow: row,
+                key: createRowKey(row, columnsA),
+                index: index
+            }));
+
+            const rowsB = dataB.rows.map((row, index) => ({
+                originalRow: row,
+                key: createRowKey(row, columnsB),
+                index: index
+            }));
+
+            const keysA = new Set(rowsA.map(r => r.key));
+            const keysB = new Set(rowsB.map(r => r.key));
+
+            const onlyA = rowsA.filter(r => !keysB.has(r.key)).map(r => r.originalRow);
+            const onlyB = rowsB.filter(r => !keysA.has(r.key)).map(r => r.originalRow);
+            const both = rowsA.filter(r => keysB.has(r.key)).map(r => r.originalRow);
+
+            // Find duplicates in each table based on selected columns
+            const duplicatesA = findTableDuplicates(dataA.rows, columnsA);
+            const duplicatesB = findTableDuplicates(dataB.rows, columnsB);
+
+            // Remove duplicates if option is selected
+            if (removeDuplicates.checked) {
+                const uniqueKeys = new Set();
+                return {
+                    onlyA: onlyA.filter(row => {
+                        const key = createRowKey(row, columnsA);
+                        if (uniqueKeys.has(key)) return false;
+                        uniqueKeys.add(key);
+                        return true;
+                    }),
+                    onlyB: onlyB.filter(row => {
+                        const key = createRowKey(row, columnsB);
+                        if (uniqueKeys.has(`B_${key}`)) return false;
+                        uniqueKeys.add(`B_${key}`);
+                        return true;
+                    }),
+                    both: both.filter(row => {
+                        const key = createRowKey(row, columnsA);
+                        if (uniqueKeys.has(`BOTH_${key}`)) return false;
+                        uniqueKeys.add(`BOTH_${key}`);
+                        return true;
+                    }),
+                    duplicatesA,
+                    duplicatesB
+                };
+            }
+
+            return { onlyA, onlyB, both, duplicatesA, duplicatesB };
+        }
+
+        function displayListResults() {
+            const { onlyA, onlyB, both, duplicatesA, duplicatesB } = comparisonResults;
+            
+            // Update labels
+            document.getElementById('totalALabel').textContent = 'Items in List A';
+            document.getElementById('totalBLabel').textContent = 'Items in List B';
+            document.getElementById('onlyALabel').textContent = 'Only in A';
+            document.getElementById('onlyBLabel').textContent = 'Only in B';
+            document.getElementById('bothLabel').textContent = 'In Both Lists';
+            
+            // Update stats
+            document.getElementById('totalA').textContent = processListText(listAInput.value).length;
+            document.getElementById('totalB').textContent = processListText(listBInput.value).length;
+            document.getElementById('onlyACount').textContent = onlyA.length;
+            document.getElementById('onlyBCount').textContent = onlyB.length;
+            document.getElementById('bothCount').textContent = both.length;
+            document.getElementById('duplicatesACount').textContent = duplicatesA.length;
+            document.getElementById('duplicatesBCount').textContent = duplicatesB.length;
+            
+            // Update badges
+            document.getElementById('onlyACountBadge').textContent = onlyA.length;
+            document.getElementById('onlyBCountBadge').textContent = onlyB.length;
+            document.getElementById('bothCountBadge').textContent = both.length;
+            document.getElementById('duplicatesACountBadge').textContent = duplicatesA.length;
+            document.getElementById('duplicatesBCountBadge').textContent = duplicatesB.length;
+            
+            // Populate lists
+            populateResultList('onlyAList', onlyA);
+            populateResultList('onlyBList', onlyB);
+            populateResultList('bothList', both);
+            populateResultList('duplicatesAList', duplicatesA);
+            populateResultList('duplicatesBList', duplicatesB);
+            
+            // Show/hide duplicates section based on whether duplicates exist
+            const duplicatesSection = document.getElementById('duplicatesResults');
+            if (duplicatesA.length > 0 || duplicatesB.length > 0) {
+                duplicatesSection.style.display = 'grid';
+            } else {
+                duplicatesSection.style.display = 'none';
+            }
+            
+            // Show list results, hide table results
+            document.getElementById('listResults').style.display = 'grid';
+            document.getElementById('tableResults').style.display = 'none';
+            resultsSection.style.display = 'block';
+        }
+
+        function displayTableResults() {
+            const { onlyA, onlyB, both, duplicatesA, duplicatesB } = comparisonResults;
+            
+            // Update labels
+            document.getElementById('totalALabel').textContent = 'Rows in Table A';
+            document.getElementById('totalBLabel').textContent = 'Rows in Table B';
+            document.getElementById('onlyALabel').textContent = 'Only in A';
+            document.getElementById('onlyBLabel').textContent = 'Only in B';
+            document.getElementById('bothLabel').textContent = 'In Both Tables';
+            
+            // Update stats
+            document.getElementById('totalA').textContent = tableDataA.rows.length;
+            document.getElementById('totalB').textContent = tableDataB.rows.length;
+            document.getElementById('onlyACount').textContent = onlyA.length;
+            document.getElementById('onlyBCount').textContent = onlyB.length;
+            document.getElementById('bothCount').textContent = both.length;
+            document.getElementById('duplicatesACount').textContent = duplicatesA.length;
+            document.getElementById('duplicatesBCount').textContent = duplicatesB.length;
+            
+            // Update table badges
+            document.getElementById('onlyATableCount').textContent = onlyA.length;
+            document.getElementById('onlyBTableCount').textContent = onlyB.length;
+            document.getElementById('bothTableCount').textContent = both.length;
+            
+            // Show comparison info
+            showComparisonInfo();
+            
+            // Populate table results with ALL columns but highlight comparison ones
+            populateResultTable('onlyATable', onlyA, tableDataA.headers, selectedColumnsA);
+            populateResultTable('onlyBTable', onlyB, tableDataB.headers, selectedColumnsB);
+            populateResultTable('bothTable', both, tableDataA.headers, selectedColumnsA);
+            
+            // Show/hide duplicates section based on whether duplicates exist
+            const duplicatesSection = document.getElementById('duplicatesResults');
+            if (duplicatesA.length > 0 || duplicatesB.length > 0) {
+                duplicatesSection.style.display = 'grid';
+                // For table mode, populate with simplified view (just the comparison columns)
+                populateResultList('duplicatesAList', duplicatesA.map(row => 
+                    selectedColumnsA.map(col => row[col] || '').join(' | ')
+                ));
+                populateResultList('duplicatesBList', duplicatesB.map(row => 
+                    selectedColumnsB.map(col => row[col] || '').join(' | ')
+                ));
+                document.getElementById('duplicatesACountBadge').textContent = duplicatesA.length;
+                document.getElementById('duplicatesBCountBadge').textContent = duplicatesB.length;
+            } else {
+                duplicatesSection.style.display = 'none';
+            }
+            
+            // Show table results, hide list results
+            document.getElementById('listResults').style.display = 'none';
+            document.getElementById('tableResults').style.display = 'block';
+            resultsSection.style.display = 'block';
+        }
+
+        function showComparisonInfo() {
+            const comparisonInfo = document.getElementById('comparisonInfo');
+            const columnsAText = selectedColumnsA.join(', ');
+            const columnsBText = selectedColumnsB.join(', ');
+            
+            comparisonInfo.innerHTML = `
+                <strong>🔍 Comparison based on:</strong><br>
+                • <strong>Table A:</strong> ${columnsAText}<br>
+                • <strong>Table B:</strong> ${columnsBText}<br>
+                <em>Compared columns are highlighted in orange in the results.</em>
+            `;
+            comparisonInfo.style.display = 'block';
+        }
+
+        function populateResultTable(elementId, rows, headers, comparisonColumns = []) {
+            const table = document.getElementById(elementId);
+            table.innerHTML = '';
+            
+            if (rows.length === 0) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.textContent = 'No rows found';
+                td.style.fontStyle = 'italic';
+                td.style.color = '#999';
+                td.colSpan = headers.length;
+                td.style.textAlign = 'center';
+                tr.appendChild(td);
+                table.appendChild(tr);
+                return;
+            }
+            
+            // Create header with highlighting for comparison columns
+            const headerRow = document.createElement('tr');
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                
+                // Highlight comparison columns
+                if (comparisonColumns.includes(header)) {
+                    th.classList.add('comparison-column');
+                    th.title = 'Column used for comparison';
+                }
+                
+                headerRow.appendChild(th);
+            });
+            table.appendChild(headerRow);
+            
+            // Create rows (limit to first 50 for performance)
+            const displayRows = rows.slice(0, 50);
+            displayRows.forEach(row => {
+                const tr = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.textContent = row[header] || '';
+                    
+                    // Highlight comparison columns
+                    if (comparisonColumns.includes(header)) {
+                        td.classList.add('comparison-column');
+                    }
+                    
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+            
+            // Add note if truncated
+            if (rows.length > 50) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.textContent = `... (${rows.length - 50} more rows not shown)`;
+                td.style.fontStyle = 'italic';
+                td.style.color = '#999';
+                td.colSpan = headers.length;
+                td.style.textAlign = 'center';
+                tr.appendChild(td);
+                table.appendChild(tr);
+            }
+        }
+
+        function processListText(text) {
+            if (!text) return [];
+            
+            let items = text.split('\n');
+            
+            if (trimWhitespace.checked) {
+                items = items.map(item => item.trim());
+            }
+            
+            if (ignoreEmpty.checked) {
+                items = items.filter(item => item.length > 0);
+            }
+            
+            if (!caseSensitive.checked) {
+                items = items.map(item => item.toLowerCase());
+            }
+            
+            if (removeDuplicates.checked) {
+                items = [...new Set(items)];
+            }
+            
+            return items;
+        }
+
+        function findDuplicates(array) {
+            const seen = new Set();
+            const duplicates = new Set();
+            
+            array.forEach(item => {
+                if (seen.has(item)) {
+                    duplicates.add(item);
+                } else {
+                    seen.add(item);
+                }
+            });
+            
+            return Array.from(duplicates);
+        }
+
+        function compareArrays(arrayA, arrayB) {
+            const setA = new Set(arrayA);
+            const setB = new Set(arrayB);
+            
+            const onlyA = arrayA.filter(item => !setB.has(item));
+            const onlyB = arrayB.filter(item => !setA.has(item));
+            const both = arrayA.filter(item => setB.has(item));
+            
+            // Find duplicates in each original array (before deduplication)
+            const duplicatesA = findDuplicates(arrayA);
+            const duplicatesB = findDuplicates(arrayB);
+            
+            return {
+                onlyA: [...new Set(onlyA)],
+                onlyB: [...new Set(onlyB)],
+                both: [...new Set(both)],
+                duplicatesA,
+                duplicatesB
+            };
+        }
+
+        function populateResultList(elementId, items) {
+            const list = document.getElementById(elementId);
+            list.innerHTML = '';
+            
+            if (items.length === 0) {
+                const li = document.createElement('li');
+                li.className = 'result-item';
+                li.textContent = 'No items found';
+                li.style.fontStyle = 'italic';
+                li.style.color = '#999';
+                list.appendChild(li);
+                return;
+            }
+            
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'result-item';
+                li.textContent = item;
+                list.appendChild(li);
+            });
+        }
+
+        function downloadResults(type, baseName) {
+            const data = comparisonResults[type];
+            if (data.length === 0) {
+                showStatus('No data to download', 'error');
+                return;
+            }
+            
+            if (currentMode === 'table') {
+                downloadTableResults(data, `${baseName}.csv`);
+            } else {
+                const content = data.join('\n');
+                downloadTextFile(content, `${baseName}.txt`);
+            }
+        }
+
+        function downloadTableResults(rows, filename) {
+            if (rows.length === 0) return;
+            
+            const headers = Object.keys(rows[0]);
+            let csvContent = headers.join(',') + '\n';
+            
+            rows.forEach(row => {
+                const values = headers.map(header => {
+                    const value = String(row[header] || '');
+                    // Escape commas and quotes
+                    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                        return '"' + value.replace(/"/g, '""') + '"';
+                    }
+                    return value;
+                });
+                csvContent += values.join(',') + '\n';
+            });
+            
+            downloadTextFile(csvContent, filename);
+        }
+
+        function downloadAllResults() {
+            const { onlyA, onlyB, both, duplicatesA, duplicatesB } = comparisonResults;
+            
+            let content = `# ${currentMode === 'table' ? 'Table' : 'List'} Comparison Results\n\n`;
+            content += `Generated: ${new Date().toLocaleString()}\n`;
+            content += `Mode: ${currentMode === 'table' ? 'Table Comparison' : 'List Comparison'}\n`;
+            
+            if (currentMode === 'table') {
+                content += `Total rows in Table A: ${tableDataA?.rows.length || 0}\n`;
+                content += `Total rows in Table B: ${tableDataB?.rows.length || 0}\n`;
+                content += `Compared columns A: ${selectedColumnsA.join(', ')}\n`;
+                content += `Compared columns B: ${selectedColumnsB.join(', ')}\n\n`;
+            } else {
+                content += `Total items in List A: ${processListText(listAInput.value).length}\n`;
+                content += `Total items in List B: ${processListText(listBInput.value).length}\n\n`;
+            }
+            
+            const sectionName = currentMode === 'table' ? 'Table' : 'List';
+            
+            content += `## Only in ${sectionName} A:\n`;
+            if (onlyA.length > 0) {
+                if (currentMode === 'table') {
+                    onlyA.forEach(row => {
+                        content += Object.values(row).join(' | ') + '\n';
+                    });
+                } else {
+                    content += onlyA.join('\n');
+                }
+                content += '\n\n';
+            } else {
+                content += '(No items)\n\n';
+            }
+            
+            content += `## Only in ${sectionName} B:\n`;
+            if (onlyB.length > 0) {
+                if (currentMode === 'table') {
+                    onlyB.forEach(row => {
+                        content += Object.values(row).join(' | ') + '\n';
+                    });
+                } else {
+                    content += onlyB.join('\n');
+                }
+                content += '\n\n';
+            } else {
+                content += '(No items)\n\n';
+            }
+            
+            content += `## Common Items (In Both ${sectionName}s):\n`;
+            if (both.length > 0) {
+                if (currentMode === 'table') {
+                    both.forEach(row => {
+                        content += Object.values(row).join(' | ') + '\n';
+                    });
+                } else {
+                    content += both.join('\n');
+                }
+                content += '\n\n';
+            } else {
+                content += '(No items)\n\n';
+            }
+            
+            // Add duplicates sections
+            content += `## Duplicates in ${sectionName} A:\n`;
+            if (duplicatesA.length > 0) {
+                if (currentMode === 'table') {
+                    duplicatesA.forEach(row => {
+                        content += Object.values(row).join(' | ') + '\n';
+                    });
+                } else {
+                    content += duplicatesA.join('\n');
+                }
+                content += '\n\n';
+            } else {
+                content += '(No duplicates found)\n\n';
+            }
+            
+            content += `## Duplicates in ${sectionName} B:\n`;
+            if (duplicatesB.length > 0) {
+                if (currentMode === 'table') {
+                    duplicatesB.forEach(row => {
+                        content += Object.values(row).join(' | ') + '\n';
+                    });
+                } else {
+                    content += duplicatesB.join('\n');
+                }
+                content += '\n';
+            } else {
+                content += '(No duplicates found)\n';
+            }
+            
+            const filename = currentMode === 'table' ? 'table-comparison-results.txt' : 'list-comparison-results.txt';
+            downloadTextFile(content, filename);
+        }
+
+        function downloadTextFile(content, filename) {
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showStatus(`✅ File "${filename}" downloaded successfully`, 'success');
+        }
+
+        function clearAll() {
+            listAInput.value = '';
+            listBInput.value = '';
+            fileInputA.value = '';
+            fileInputB.value = '';
+            
+            document.getElementById('fileInfoA').style.display = 'none';
+            document.getElementById('fileInfoB').style.display = 'none';
+            document.getElementById('previewA').style.display = 'none';
+            document.getElementById('previewB').style.display = 'none';
+            
+            document.getElementById('columnsA').innerHTML = '';
+            document.getElementById('columnsB').innerHTML = '';
+            
+            tableDataA = null;
+            tableDataB = null;
+            selectedColumnsA = [];
+            selectedColumnsB = [];
+            
+            resultsSection.style.display = 'none';
+            comparisonResults = { onlyA: [], onlyB: [], both: [], duplicatesA: [], duplicatesB: [] };
+            
+            hideStatus();
+            showStatus('✅ All data cleared', 'success');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showLoading() {
+            loading.style.display = 'block';
+            compareBtn.disabled = true;
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+            compareBtn.disabled = false;
+        }
+
+        function showStatus(message, type) {
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                hideStatus();
+            }, 5000);
+        }
+
+        function hideStatus() {
+            status.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
