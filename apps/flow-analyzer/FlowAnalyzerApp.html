@@ -7,7 +7,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@1.3.0/dist/transformers.min.js"></script>
     <script>
-        window.loadGenerator = async () => pipeline('text-generation', 'Xenova/distilgpt2');
+        window.loadGenerator = async () =>
+            pipeline('text-generation', 'Xenova/distilgpt2', { dtype: 'fp16' });
     </script>
     <style>
         body {
