@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Automate Doc Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script type="module">
+        import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@1.3.0';
+        window.loadGenerator = async () => pipeline('text-generation', 'Xenova/distilgpt2');
+    </script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+            padding-top: 70px;
+        }
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #000000;
+            color: #ffffff;
+            z-index: 1000;
+            border-bottom: 3px solid #ff6b35;
+        }
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            text-decoration: none;
+            color: #ffffff;
+        }
+        .nav-logo:hover { color: #ff6b35; }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .upload-zone {
+            border: 2px dashed #ff6b35;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th { background: #f5f5f5; }
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <div class="nav-content">
+            <a href="../../index.html" class="nav-logo">Sami's Tools</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Power Automate Doc Generator</h1>
+        <div id="uploadZone" class="upload-zone">Drop JSON or ZIP here</div>
+        <input type="file" id="fileInput" accept=".json,.zip" style="display:none" />
+        <button id="analyzeBtn">Analyze Flow</button>
+        <button id="explainBtn" disabled>Generate Explanations</button>
+        <div id="results"></div>
+    </div>
+
+<script type="module">
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const explainBtn = document.getElementById('explainBtn');
+    const resultsDiv = document.getElementById('results');
+    let flowDefinition = null;
+    let actions = [];
+    let generator = null;
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
+    uploadZone.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadZone.classList.remove('drag');
+        if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', e => {
+        if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    analyzeBtn.addEventListener('click', () => { if (flowDefinition) displayActions(); });
+    explainBtn.addEventListener('click', generateExplanations);
+
+    async function handleFile(file) {
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (ext === 'zip') {
+            const data = await file.arrayBuffer();
+            const zip = await JSZip.loadAsync(data);
+            const jsonFile = Object.values(zip.files).find(f => f.name.endsWith('.json'));
+            if (jsonFile) {
+                const text = await jsonFile.async('text');
+                flowDefinition = JSON.parse(text);
+            }
+        } else if (ext === 'json') {
+            const text = await file.text();
+            flowDefinition = JSON.parse(text);
+        }
+        actions = extractActions(flowDefinition);
+        displayActions();
+        explainBtn.disabled = actions.length === 0;
+    }
+
+    function extractActions(def) {
+        const list = [];
+        function traverse(obj, name) {
+            if (!obj || typeof obj !== 'object') return;
+            if (obj.type) list.push({ name, type: obj.type, raw: obj });
+            for (const key in obj) traverse(obj[key], key);
+        }
+        if (def) traverse(def, 'root');
+        return list;
+    }
+
+    function displayActions() {
+        const table = document.createElement('table');
+        table.innerHTML = '<tr><th>Step</th><th>Type</th><th>Explanation</th></tr>';
+        actions.forEach(a => {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${a.name || ''}</td><td>${a.type}</td><td class="exp"></td>`;
+            table.appendChild(row);
+            a.row = row.querySelector('.exp');
+        });
+        resultsDiv.innerHTML = '';
+        resultsDiv.appendChild(table);
+    }
+
+    async function generateExplanations() {
+        if (!generator) generator = await window.loadGenerator();
+        for (const a of actions) {
+            const prompt = `Explain the purpose of this Power Automate action: ${a.type}`;
+            const out = await generator(prompt, { max_new_tokens: 40 });
+            a.row.textContent = out[0].generated_text.replace(prompt, '').trim();
+        }
+    }
+</script>
+</body>
+</html>
